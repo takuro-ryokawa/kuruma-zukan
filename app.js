@@ -225,6 +225,13 @@
     box.hidden = true;
     if (!car.paint) return;
     let chosen = 0;
+    const label = $('color-name');
+    const showName = () => {
+      const col = car.paint.colors[chosen];
+      label.textContent = col.kana;
+      $('color-note').textContent = car.paint.real ? `${col.name}（ほんものの くるまに ある いろ）` : '';
+    };
+    showName();
     const apply = () => {
       if (!mv.model) return;
       const mat = mv.model.materials.find((m) => m.name === car.paint.material);
@@ -239,6 +246,7 @@
       b.setAttribute('aria-pressed', String(i === 0));
       b.addEventListener('click', () => {
         chosen = i;
+        showName();
         row.querySelectorAll('.swatch').forEach((x, j) => x.setAttribute('aria-pressed', String(j === i)));
         apply();
       });

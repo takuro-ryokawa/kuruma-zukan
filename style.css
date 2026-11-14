@@ -410,3 +410,7 @@ button, label { font: inherit; }
 .quiz-end { text-align: center; padding-top: 40px; }
 .quiz-score { font-size: 30px; font-weight: 900; margin: 0; }
 .quiz-msg { font-size: 22px; margin: 8px 0 24px; }
+
+.color-name { margin-top: 8px; font-size: 22px; font-weight: 900; }
+.color-note { font-size: 13px; color: var(--sub); font-family: -apple-system, 'Hiragino Sans', sans-serif; }
+.color-note:empty { display: none; }
