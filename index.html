@@ -25,7 +25,11 @@
 <section id="list-view">
   <header class="top">
     <h1>くるま ずかん</h1>
+    <a class="quiz-link" href="#/quiz">くいず</a>
   </header>
+  <div class="search">
+    <input type="search" id="search" placeholder="くるまを さがす" autocomplete="off" enterkeyhint="search" aria-label="くるまを さがす">
+  </div>
   <nav id="kinds" class="kinds" aria-label="しゅるい"></nav>
   <main id="cards" class="cards"></main>
   <footer class="foot">
@@ -40,6 +44,10 @@
   </header>
   <div class="stage" id="stage"></div>
   <p class="hint">ゆびで うごかすと くるっと まわるよ</p>
+  <div class="colors" id="colors" hidden>
+    <div class="colors-title">いろを かえる</div>
+    <div class="swatches" id="swatches"></div>
+  </div>
   <div class="info">
     <span class="kind-chip" id="car-kind"></span>
     <h2 id="car-kana"></h2>
@@ -66,6 +74,26 @@
     </dl>
     <p class="credit" id="car-credit"></p>
   </section>
+</section>
+
+<!-- クイズ -->
+<section id="quiz-view" hidden>
+  <header class="bar">
+    <a class="back" href="#/">← もどる</a>
+    <span class="quiz-count" id="quiz-count"></span>
+  </header>
+  <div class="quiz" id="quiz-play">
+    <p class="quiz-q">この くるまは どれ？</p>
+    <div class="quiz-pic"><img id="quiz-img" alt=""></div>
+    <div class="quiz-choices" id="quiz-choices"></div>
+    <p class="quiz-result" id="quiz-result" aria-live="polite"></p>
+    <button type="button" class="quiz-next" id="quiz-next" hidden>つぎへ</button>
+  </div>
+  <div class="quiz quiz-end" id="quiz-end" hidden>
+    <p class="quiz-score" id="quiz-score"></p>
+    <p class="quiz-msg" id="quiz-msg"></p>
+    <button type="button" class="quiz-next" id="quiz-again">もういちど</button>
+  </div>
 </section>
 
 <!-- このアプリについて -->

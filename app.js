@@ -58,13 +58,19 @@
 
   // ---------- 一覧 ----------
   let currentKind = 'all';
+  let query = '';
+
+  // さがすときは、カタカナをひらがなに、大文字を小文字にそろえて比べる
+  const norm = (s) => String(s).toLowerCase()
+    .replace(/[\u30a1-\u30f6]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0x60))
+    .replace(/[\s　]/g, '');
+  const matches = (c, q) => !q || [c.kana, c.name, c.maker, kindOf(c.kind).kana, c.credit.title].some((t) => norm(t).includes(q));
 
   function renderKinds() {
     const used = new Set(CARS.map((c) => c.kind));
     const items = [{ id: 'all', kana: 'ぜんぶ' }, ...KINDS.filter((k) => used.has(k.id))];
     const nav = $('kinds');
     nav.innerHTML = '';
-    nav.hidden = items.length <= 2;
     for (const k of items) {
       const b = document.createElement('button');
       b.type = 'button';
@@ -78,9 +84,10 @@
   function renderCards() {
     const box = $('cards');
     box.innerHTML = '';
-    const cars = CARS.filter((c) => currentKind === 'all' || c.kind === currentKind);
+    const q = norm(query);
+    const cars = CARS.filter((c) => (currentKind === 'all' || c.kind === currentKind) && matches(c, q));
     if (!cars.length) {
-      box.innerHTML = '<p class="empty">まだ ないよ</p>';
+      box.innerHTML = `<p class="empty">${q ? 'みつからないよ' : 'まだ ないよ'}</p>`;
       return;
     }
     for (const c of cars) {
@@ -101,6 +108,8 @@
       box.appendChild(a);
     }
   }
+
+  $('search').addEventListener('input', (e) => { query = e.target.value; renderCards(); });
 
   // ---------- 1台のページ ----------
   let current = null;
@@ -170,6 +179,7 @@
     mv.setAttribute('camera-orbit', '35deg 75deg auto');
     stage.style.background = k.color + '18';
     stage.appendChild(mv);
+    renderColors(car, mv);
 
     stopSound();
     const sb = $('sound-btn');
@@ -178,6 +188,109 @@
 
     renderPhotos();
   }
+
+  // ---------- 色の切りかえ ----------
+  function renderColors(car, mv) {
+    const box = $('colors');
+    const row = $('swatches');
+    row.innerHTML = '';
+    box.hidden = true;
+    if (!car.paint) return;
+    let chosen = 0;
+    const apply = () => {
+      if (!mv.model) return;
+      const mat = mv.model.materials.find((m) => m.name === car.paint.material);
+      if (mat) mat.pbrMetallicRoughness.setBaseColorFactor(car.paint.colors[chosen].css);
+    };
+    car.paint.colors.forEach((col, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'swatch';
+      b.style.background = col.css;
+      b.setAttribute('aria-label', col.kana);
+      b.setAttribute('aria-pressed', String(i === 0));
+      b.addEventListener('click', () => {
+        chosen = i;
+        row.querySelectorAll('.swatch').forEach((x, j) => x.setAttribute('aria-pressed', String(j === i)));
+        apply();
+      });
+      row.appendChild(b);
+    });
+    // 色のボタンは、3Dモデルを読みこみ終わってから出す
+    mv.addEventListener('load', () => { box.hidden = false; if (chosen) apply(); });
+  }
+
+  // ---------- クイズ ----------
+  const shuffle = (a) => {
+    const r = a.slice();
+    for (let i = r.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [r[i], r[j]] = [r[j], r[i]];
+    }
+    return r;
+  };
+  let quiz = null;
+
+  function startQuiz() {
+    quiz = { cars: shuffle(CARS).slice(0, 5), at: 0, right: 0 };
+    $('quiz-end').hidden = true;
+    $('quiz-play').hidden = false;
+    showQuestion();
+  }
+
+  function showQuestion() {
+    const car = quiz.cars[quiz.at];
+    $('quiz-count').textContent = `${quiz.at + 1} / ${quiz.cars.length}`;
+    $('quiz-img').src = car.poster;
+    $('quiz-result').textContent = '';
+    $('quiz-result').className = 'quiz-result';
+    $('quiz-next').hidden = true;
+    // はずれは、まず図鑑のほかの車から。足りない分は QUIZ_DECOYS から
+    const others = shuffle(CARS.filter((c) => c.kana !== car.kana).map((c) => c.kana));
+    const decoys = shuffle((window.QUIZ_DECOYS || []).filter((n) => n !== car.kana && !others.includes(n)));
+    const wrong = [...new Set(others)].concat(decoys).slice(0, 2);
+    const box = $('quiz-choices');
+    box.innerHTML = '';
+    for (const name of shuffle([car.kana, ...wrong])) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = name;
+      b.addEventListener('click', () => answer(b, name === car.kana, car));
+      box.appendChild(b);
+    }
+  }
+
+  function answer(btn, ok, car) {
+    const buttons = [...$('quiz-choices').children];
+    buttons.forEach((b) => {
+      b.disabled = true;
+      if (b.textContent === car.kana) b.classList.add('right');
+    });
+    const res = $('quiz-result');
+    if (ok) {
+      quiz.right++;
+      res.textContent = '◯ せいかい！';
+      res.classList.add('ok');
+    } else {
+      btn.classList.add('wrong');
+      res.textContent = `ざんねん… こたえは「${car.kana}」`;
+      res.classList.add('ng');
+    }
+    const next = $('quiz-next');
+    next.textContent = quiz.at + 1 < quiz.cars.length ? 'つぎへ' : 'けっかを みる';
+    next.hidden = false;
+  }
+
+  $('quiz-next').addEventListener('click', () => {
+    quiz.at++;
+    if (quiz.at < quiz.cars.length) { showQuestion(); return; }
+    $('quiz-play').hidden = true;
+    $('quiz-end').hidden = false;
+    $('quiz-count').textContent = '';
+    $('quiz-score').textContent = `${quiz.cars.length}もん ちゅう ${quiz.right}もん せいかい`;
+    $('quiz-msg').textContent = quiz.right === quiz.cars.length ? 'ぜんぶ せいかい！ すごい！' : 'また やってみよう！';
+  });
+  $('quiz-again').addEventListener('click', startQuiz);
 
   function stopSound() {
     if (audio) { audio.pause(); audio = null; }
@@ -311,6 +424,7 @@
       if (car) {
         listV.hidden = true;
         $('about-view').hidden = true;
+        $('quiz-view').hidden = true;
         $('car-view').hidden = false;
         showCar(car);
         window.scrollTo(0, 0);
@@ -321,6 +435,15 @@
     current = null;
     $('stage').innerHTML = '';
     $('car-view').hidden = true;
+    $('quiz-view').hidden = true;
+    if (h === '#/quiz') {
+      listV.hidden = true;
+      $('about-view').hidden = true;
+      $('quiz-view').hidden = false;
+      startQuiz();
+      window.scrollTo(0, 0);
+      return;
+    }
     if (h === '#/about') {
       listV.hidden = true;
       $('about-view').hidden = false;

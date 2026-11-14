@@ -11,6 +11,8 @@
 // sound    : エンジン音のファイル（sounds/ の中）。ない車は書かない
 // soundCredit : エンジン音の出どころ（sound があるときだけ）
 // credit   : 3Dモデルの出どころ（作者・ライセンス）
+// paint    : 色を切りかえられる車だけ書く。material は車体の色の部品の名前、
+//            colors は色の一覧（最初の1つが もとの色）
 
 window.KINDS = [
   { id: 'sports', kana: 'すぽーつかー', color: '#e63946' },
@@ -29,6 +31,19 @@ window.CARS = [
     years: '1993年〜2002年',
     model: 'models/supra.glb',
     poster: 'posters/supra.webp',
+    paint: {
+      material: 'TOYOTA_SUPRA_CAR_PAINT',
+      colors: [
+        { kana: 'あか', css: '#c40d12' },
+        { kana: 'しろ', css: '#f2f2f2' },
+        { kana: 'くろ', css: '#141414' },
+        { kana: 'ぎんいろ', css: '#9aa0a6' },
+        { kana: 'あお', css: '#0b3fa8' },
+        { kana: 'きいろ', css: '#f2c200' },
+        { kana: 'みどり', css: '#0d6b3a' },
+        { kana: 'おれんじ', css: '#f26a00' },
+      ],
+    },
     credit: {
       title: 'Toyota Supra MK IV (1994)',
       author: 'Martin Trafas',
@@ -39,4 +54,10 @@ window.CARS = [
       changes: 'ファイルを軽くするため圧縮しました',
     },
   },
+];
+
+// クイズの はずれの選択肢に まぜる名前（図鑑の車が少ないうちに使います）
+window.QUIZ_DECOYS = [
+  'しびっく', 'ぷりうす', 'じむにー', 'はいえーす', 'らんどくるーざー',
+  'ふぃっと', 'かろーら', 'じーてぃーあーる', 'ろーどすたー', 'えぬぼっくす',
 ];
