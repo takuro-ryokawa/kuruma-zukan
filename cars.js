@@ -54,6 +54,39 @@ window.CARS = [
       changes: 'ファイルを軽くするため圧縮しました',
     },
   },
+  {
+    id: 'civic',
+    kana: 'しびっく',
+    say: 'ちいさくて きびきび はしる くるま。せかいじゅうで にんきが あるよ。',
+    kind: 'sports',
+    name: 'シビック Si（1999年式・クーペ）',
+    maker: 'ホンダ',
+    years: '1999年〜2000年（北米向け）',
+    model: 'models/civic.glb',
+    poster: 'posters/civic.webp',
+    paint: {
+      material: 'CarPaint',
+      colors: [
+        { kana: 'あお', css: '#0044bb' },
+        { kana: 'しろ', css: '#f2f2f2' },
+        { kana: 'くろ', css: '#141414' },
+        { kana: 'ぎんいろ', css: '#9aa0a6' },
+        { kana: 'あか', css: '#c40d12' },
+        { kana: 'きいろ', css: '#f2c200' },
+        { kana: 'みどり', css: '#0d6b3a' },
+        { kana: 'おれんじ', css: '#f26a00' },
+      ],
+    },
+    credit: {
+      title: '1999 Honda Civic Si',
+      author: 'Ddiaz Design',
+      license: 'CC BY-NC-SA 4.0',
+      licenseUrl: 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
+      source: 'Sketchfab',
+      sourceUrl: 'https://sketchfab.com/3d-models/1999-honda-civic-si-ce29e75eb129406f874e0423ab8869c3',
+      changes: 'ファイルを軽くするため圧縮しました',
+    },
+  },
 ];
 
 // クイズの はずれの選択肢に まぜる名前（図鑑の車が少ないうちに使います）
