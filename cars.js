@@ -35,7 +35,7 @@ window.CARS = [
       license: 'CC BY 4.0',
       licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
       source: 'Sketchfab',
-      sourceUrl: '',
+      sourceUrl: 'https://skfb.ly/ooJwY',
       changes: 'ファイルを軽くするため圧縮しました',
     },
   },
