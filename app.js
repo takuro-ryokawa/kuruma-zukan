@@ -5,6 +5,8 @@
   const tagOf = (id) => TAGS.find((t) => t.id === id) || { id, kana: id, color: '#888' };
   // 車の最初のタグ（メーカー）
   const makerOf = (car) => tagOf(car.tags[0]);
+  // クイズなどで使う名前。同じ名前の車は、世代をつけて見分ける
+  const label = (car) => (car.sub ? `${car.kana}（${car.sub}）` : car.kana);
 
   // ---------- 写真の保存（このブラウザの中だけ） ----------
   const DB_NAME = 'kuruma-zukan';
@@ -67,7 +69,7 @@
   const norm = (s) => String(s).toLowerCase()
     .replace(/[\u30a1-\u30f6]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0x60))
     .replace(/[\s　]/g, '');
-  const matches = (c, q) => !q || [c.kana, c.name, c.maker, c.credit.title, ...c.tags.map((t) => tagOf(t).kana)].some((t) => norm(t).includes(q));
+  const matches = (c, q) => !q || [c.kana, c.sub || '', c.name, c.maker, c.credit.title, ...(c.alias || []), ...c.tags.map((t) => tagOf(t).kana)].some((t) => norm(t).includes(q));
 
   // えらんだタグに合う車か。同じ列（めーかー など）の中は「どれか」、
   // ちがう列どうしは「どちらも」で しぼる
@@ -177,6 +179,12 @@
           <div class="kind"></div>
         </div>`;
       a.querySelector('.kana').textContent = c.kana;
+      if (c.sub) {
+        const sub = document.createElement('span');
+        sub.className = 'sub';
+        sub.textContent = c.sub;
+        a.querySelector('.kana').appendChild(sub);
+      }
       a.querySelector('.kind').textContent = k.kana;
       box.appendChild(a);
     }
@@ -234,6 +242,7 @@
       chips.appendChild(b);
     }
     $('car-kana').textContent = car.kana;
+    $('car-sub').textContent = car.sub || '';
     $('car-say').textContent = car.say;
     $('car-name').textContent = car.name;
     $('car-maker').textContent = car.maker;
@@ -337,16 +346,16 @@
     $('quiz-result').className = 'quiz-result';
     $('quiz-next').hidden = true;
     // はずれは、まず図鑑のほかの車から。足りない分は QUIZ_DECOYS から
-    const others = shuffle(CARS.filter((c) => c.kana !== car.kana).map((c) => c.kana));
-    const decoys = shuffle((window.QUIZ_DECOYS || []).filter((n) => n !== car.kana && !others.includes(n)));
+    const others = shuffle(CARS.filter((c) => c.id !== car.id).map(label));
+    const decoys = shuffle((window.QUIZ_DECOYS || []).filter((n) => n !== label(car) && !others.includes(n)));
     const wrong = [...new Set(others)].concat(decoys).slice(0, 2);
     const box = $('quiz-choices');
     box.innerHTML = '';
-    for (const name of shuffle([car.kana, ...wrong])) {
+    for (const name of shuffle([label(car), ...wrong])) {
       const b = document.createElement('button');
       b.type = 'button';
       b.textContent = name;
-      b.addEventListener('click', () => answer(b, name === car.kana, car));
+      b.addEventListener('click', () => answer(b, name === label(car), car));
       box.appendChild(b);
     }
   }
@@ -355,7 +364,7 @@
     const buttons = [...$('quiz-choices').children];
     buttons.forEach((b) => {
       b.disabled = true;
-      if (b.textContent === car.kana) b.classList.add('right');
+      if (b.textContent === label(car)) b.classList.add('right');
     });
     const res = $('quiz-result');
     if (ok) {
@@ -364,7 +373,7 @@
       res.classList.add('ok');
     } else {
       btn.classList.add('wrong');
-      res.textContent = `ざんねん… こたえは「${car.kana}」`;
+      res.textContent = `ざんねん… こたえは「${label(car)}」`;
       res.classList.add('ng');
     }
     const next = $('quiz-next');
