@@ -284,7 +284,7 @@
     const showName = () => {
       const col = car.paint.colors[chosen];
       label.textContent = col.kana;
-      $('color-note').textContent = car.paint.real ? `${col.name}（ほんものの くるまに ある いろ）` : '';
+      $('color-note').textContent = car.paint.real ? col.name : '';
     };
     showName();
     const apply = () => {
