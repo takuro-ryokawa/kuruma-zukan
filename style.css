@@ -34,38 +34,61 @@ button, label { font: inherit; }
   font-weight: 900;
   letter-spacing: .04em;
 }
-.tags { padding: 10px 0 14px; }
-.tag-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 4px 16px;
-  scrollbar-width: none;
-}
-.tag-row::-webkit-scrollbar { display: none; }
-.tag-label {
-  flex: none;
-  font-size: 13px;
-  color: var(--sub);
-  width: 5.2em;
-  white-space: nowrap;
-}
-.tag-row button {
-  flex: none;
+.tags { padding: 10px 16px 0; }
+.filter-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.filter-open {
   border: 3px solid var(--ink);
-  background: #fff;
-  color: var(--ink);
+  background: var(--ink);
+  color: #fff;
   border-radius: 999px;
-  padding: 5px 14px;
+  padding: 7px 18px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.filter-chip {
+  border: 0;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 999px;
+  padding: 8px 14px;
   font-size: 17px;
   font-weight: 700;
   cursor: pointer;
 }
-.tag-row button[aria-pressed="true"] {
-  background: var(--ink);
-  color: #fff;
+.filter-panel {
+  margin-top: 10px;
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 12px 14px 14px;
 }
+.tag-label { font-size: 15px; font-weight: 700; color: var(--sub); margin: 8px 0 6px; }
+.tag-label:first-child { margin-top: 0; }
+.tag-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag-wrap button {
+  border: 3px solid var(--ink);
+  background: #fff;
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.tag-wrap button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.filter-foot { display: flex; gap: 10px; margin-top: 14px; }
+.filter-foot button {
+  flex: 1;
+  border-radius: 999px;
+  padding: 10px;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.filter-clear { border: 3px solid var(--line); background: #fff; color: var(--ink); }
+.filter-clear:disabled { color: #b7bdc7; }
+.filter-done { border: 3px solid var(--ink); background: var(--ink); color: #fff; }
+.count { margin: 10px 16px 8px; font-size: 16px; font-weight: 700; color: var(--sub); }
 
 .cards {
   display: grid;

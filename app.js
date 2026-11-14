@@ -59,7 +59,8 @@
   }
 
   // ---------- 一覧 ----------
-  let currentTag = 'all';
+  const selected = new Set();   // えらんでいるタグ
+  let filterOpen = false;
   let query = '';
 
   // さがすときは、カタカナをひらがなに、大文字を小文字にそろえて比べる
@@ -68,44 +69,98 @@
     .replace(/[\s　]/g, '');
   const matches = (c, q) => !q || [c.kana, c.name, c.maker, c.credit.title, ...c.tags.map((t) => tagOf(t).kana)].some((t) => norm(t).includes(q));
 
-  function tagButton(id, kana) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.textContent = kana;
-    b.setAttribute('aria-pressed', String(id === currentTag));
-    b.addEventListener('click', () => { currentTag = id; renderTags(); renderCards(); });
-    return b;
+  // えらんだタグに合う車か。同じ列（めーかー など）の中は「どれか」、
+  // ちがう列どうしは「どちらも」で しぼる
+  function tagMatch(car) {
+    for (const g of TAG_GROUPS) {
+      const want = TAGS.filter((t) => t.group === g.id && selected.has(t.id));
+      if (want.length && !want.some((t) => car.tags.includes(t.id))) return false;
+    }
+    return true;
+  }
+
+  function toggleTag(id) {
+    if (selected.has(id)) selected.delete(id); else selected.add(id);
+    renderTags();
+    renderCards();
   }
 
   function renderTags() {
     const used = new Set(CARS.flatMap((c) => c.tags));
     const nav = $('tags');
     nav.innerHTML = '';
-    const first = document.createElement('div');
-    first.className = 'tag-row';
-    first.appendChild(tagButton('all', 'ぜんぶ'));
-    nav.appendChild(first);
+
+    // ひらく・とじる ボタンと、いま えらんでいるタグ
+    const bar = document.createElement('div');
+    bar.className = 'filter-bar';
+    const open = document.createElement('button');
+    open.type = 'button';
+    open.className = 'filter-open';
+    open.setAttribute('aria-expanded', String(filterOpen));
+    open.textContent = (filterOpen ? '▲ ' : '▼ ') + 'しぼりこむ';
+    open.addEventListener('click', () => { filterOpen = !filterOpen; renderTags(); });
+    bar.appendChild(open);
+    for (const id of selected) {
+      const t = tagOf(id);
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'filter-chip';
+      chip.textContent = t.kana + ' ✕';
+      chip.setAttribute('aria-label', t.kana + ' を はずす');
+      chip.addEventListener('click', () => toggleTag(id));
+      bar.appendChild(chip);
+    }
+    nav.appendChild(bar);
+
+    if (!filterOpen) return;
+    const panel = document.createElement('div');
+    panel.className = 'filter-panel';
     for (const g of TAG_GROUPS) {
       const tags = TAGS.filter((t) => t.group === g.id && used.has(t.id));
       if (!tags.length) continue;
-      const row = document.createElement('div');
-      row.className = 'tag-row';
-      const label = document.createElement('span');
+      const label = document.createElement('div');
       label.className = 'tag-label';
       label.textContent = g.kana;
-      row.appendChild(label);
-      for (const t of tags) row.appendChild(tagButton(t.id, t.kana));
-      nav.appendChild(row);
+      panel.appendChild(label);
+      const row = document.createElement('div');
+      row.className = 'tag-wrap';
+      for (const t of tags) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = t.kana;
+        b.setAttribute('aria-pressed', String(selected.has(t.id)));
+        b.addEventListener('click', () => toggleTag(t.id));
+        row.appendChild(b);
+      }
+      panel.appendChild(row);
     }
+    const foot = document.createElement('div');
+    foot.className = 'filter-foot';
+    const clear = document.createElement('button');
+    clear.type = 'button';
+    clear.className = 'filter-clear';
+    clear.textContent = 'ぜんぶ はずす';
+    clear.disabled = !selected.size;
+    clear.addEventListener('click', () => { selected.clear(); renderTags(); renderCards(); });
+    const done = document.createElement('button');
+    done.type = 'button';
+    done.className = 'filter-done';
+    done.textContent = 'とじる';
+    done.addEventListener('click', () => { filterOpen = false; renderTags(); });
+    foot.append(clear, done);
+    panel.appendChild(foot);
+    nav.appendChild(panel);
   }
 
   function renderCards() {
     const box = $('cards');
     box.innerHTML = '';
     const q = norm(query);
-    const cars = CARS.filter((c) => (currentTag === 'all' || c.tags.includes(currentTag)) && matches(c, q));
+    const cars = CARS.filter((c) => tagMatch(c) && matches(c, q));
+    const narrowed = q || selected.size;
+    $('count').textContent = narrowed ? `${cars.length}だい みつかったよ` : `ぜんぶで ${CARS.length}だい`;
     if (!cars.length) {
-      box.innerHTML = `<p class="empty">${q ? 'みつからないよ' : 'まだ ないよ'}</p>`;
+      box.innerHTML = `<p class="empty">${narrowed ? 'みつからないよ' : 'まだ ないよ'}</p>`;
       return;
     }
     for (const c of cars) {
@@ -175,7 +230,7 @@
       b.textContent = t.kana;
       b.style.background = t.color;
       // タグを押すと、そのタグの車だけの一覧にもどる
-      b.addEventListener('click', () => { currentTag = id; lastListScroll = 0; renderTags(); renderCards(); location.hash = '#/'; });
+      b.addEventListener('click', () => { selected.clear(); selected.add(id); filterOpen = false; lastListScroll = 0; renderTags(); renderCards(); location.hash = '#/'; });
       chips.appendChild(b);
     }
     $('car-kana').textContent = car.kana;
