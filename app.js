@@ -2,7 +2,9 @@
   'use strict';
 
   const $ = (id) => document.getElementById(id);
-  const kindOf = (id) => KINDS.find((k) => k.id === id) || { kana: '', color: '#888' };
+  const tagOf = (id) => TAGS.find((t) => t.id === id) || { id, kana: id, color: '#888' };
+  // 車の最初のタグ（メーカー）
+  const makerOf = (car) => tagOf(car.tags[0]);
 
   // ---------- 写真の保存（このブラウザの中だけ） ----------
   const DB_NAME = 'kuruma-zukan';
@@ -57,27 +59,43 @@
   }
 
   // ---------- 一覧 ----------
-  let currentKind = 'all';
+  let currentTag = 'all';
   let query = '';
 
   // さがすときは、カタカナをひらがなに、大文字を小文字にそろえて比べる
   const norm = (s) => String(s).toLowerCase()
     .replace(/[\u30a1-\u30f6]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0x60))
     .replace(/[\s　]/g, '');
-  const matches = (c, q) => !q || [c.kana, c.name, c.maker, kindOf(c.kind).kana, c.credit.title].some((t) => norm(t).includes(q));
+  const matches = (c, q) => !q || [c.kana, c.name, c.maker, c.credit.title, ...c.tags.map((t) => tagOf(t).kana)].some((t) => norm(t).includes(q));
 
-  function renderKinds() {
-    const used = new Set(CARS.map((c) => c.kind));
-    const items = [{ id: 'all', kana: 'ぜんぶ' }, ...KINDS.filter((k) => used.has(k.id))];
-    const nav = $('kinds');
+  function tagButton(id, kana) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = kana;
+    b.setAttribute('aria-pressed', String(id === currentTag));
+    b.addEventListener('click', () => { currentTag = id; renderTags(); renderCards(); });
+    return b;
+  }
+
+  function renderTags() {
+    const used = new Set(CARS.flatMap((c) => c.tags));
+    const nav = $('tags');
     nav.innerHTML = '';
-    for (const k of items) {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.textContent = k.kana;
-      b.setAttribute('aria-pressed', String(k.id === currentKind));
-      b.addEventListener('click', () => { currentKind = k.id; renderKinds(); renderCards(); });
-      nav.appendChild(b);
+    const first = document.createElement('div');
+    first.className = 'tag-row';
+    first.appendChild(tagButton('all', 'ぜんぶ'));
+    nav.appendChild(first);
+    for (const g of TAG_GROUPS) {
+      const tags = TAGS.filter((t) => t.group === g.id && used.has(t.id));
+      if (!tags.length) continue;
+      const row = document.createElement('div');
+      row.className = 'tag-row';
+      const label = document.createElement('span');
+      label.className = 'tag-label';
+      label.textContent = g.kana;
+      row.appendChild(label);
+      for (const t of tags) row.appendChild(tagButton(t.id, t.kana));
+      nav.appendChild(row);
     }
   }
 
@@ -85,13 +103,13 @@
     const box = $('cards');
     box.innerHTML = '';
     const q = norm(query);
-    const cars = CARS.filter((c) => (currentKind === 'all' || c.kind === currentKind) && matches(c, q));
+    const cars = CARS.filter((c) => (currentTag === 'all' || c.tags.includes(currentTag)) && matches(c, q));
     if (!cars.length) {
       box.innerHTML = `<p class="empty">${q ? 'みつからないよ' : 'まだ ないよ'}</p>`;
       return;
     }
     for (const c of cars) {
-      const k = kindOf(c.kind);
+      const k = makerOf(c);
       const a = document.createElement('a');
       a.className = 'card';
       a.href = '#/car/' + c.id;
@@ -146,10 +164,20 @@
 
   function showCar(car) {
     current = car;
-    const k = kindOf(car.kind);
-    const chip = $('car-kind');
-    chip.textContent = k.kana;
-    chip.style.background = k.color;
+    const k = makerOf(car);
+    const chips = $('car-tags');
+    chips.innerHTML = '';
+    for (const id of car.tags) {
+      const t = tagOf(id);
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'tag-chip';
+      b.textContent = t.kana;
+      b.style.background = t.color;
+      // タグを押すと、そのタグの車だけの一覧にもどる
+      b.addEventListener('click', () => { currentTag = id; lastListScroll = 0; renderTags(); renderCards(); location.hash = '#/'; });
+      chips.appendChild(b);
+    }
     $('car-kana').textContent = car.kana;
     $('car-say').textContent = car.say;
     $('car-name').textContent = car.name;
@@ -176,7 +204,7 @@
     mv.setAttribute('rotation-per-second', '20deg');
     mv.setAttribute('interaction-prompt', 'none');
     mv.setAttribute('shadow-intensity', '1');
-    mv.setAttribute('camera-orbit', '35deg 75deg auto');
+    mv.setAttribute('camera-orbit', car.orbit || '35deg 75deg auto');
     stage.style.background = k.color + '18';
     stage.appendChild(mv);
     renderColors(car, mv);
@@ -456,7 +484,7 @@
     window.scrollTo(0, lastListScroll);
   }
 
-  renderKinds();
+  renderTags();
   renderCards();
   window.addEventListener('hashchange', route);
   route();
