@@ -301,6 +301,13 @@
       const col = car.paint.colors[chosen];
       const mat = mv.model.materials.find((m) => m.name === car.paint.material);
       if (mat) mat.pbrMetallicRoughness.setBaseColorFactor(col.css);
+      // いっしょに色を変える部品。もとの色のときは、その部品の もとの色に もどす
+      for (const name of car.paint.also || []) {
+        const m2 = mv.model.materials.find((m) => m.name === name);
+        if (!m2) continue;
+        if (!(name in alsoOrig)) alsoOrig[name] = [...m2.pbrMetallicRoughness.baseColorFactor];
+        m2.pbrMetallicRoughness.setBaseColorFactor(chosen === 0 ? alsoOrig[name] : col.css);
+      }
       if (car.paint.hood) {
         const h = mv.model.materials.find((m) => m.name === car.paint.hood);
         if (h) h.pbrMetallicRoughness.setBaseColorFactor(col.decal ? '#070707' : col.css);
@@ -322,6 +329,7 @@
       }
     };
     let decalMode = null;
+    const alsoOrig = {};
     car.paint.colors.forEach((col, i) => {
       const b = document.createElement('button');
       b.type = 'button';

@@ -13,6 +13,7 @@
 // soundCredit : エンジン音の出どころ（sound があるときだけ）
 // paint    : 色を切りかえられる車だけ書く。material は車体の色の部品の名前、
 //            colors は色の一覧（最初の1つが もとの色）
+//            also は、いっしょに同じ色にする部品（もとの色のときは そのまま）
 // credit   : 3Dモデルの出どころ（作者・ライセンス）
 
 // タグ。group ごとに1列で並びます。
@@ -42,6 +43,7 @@ window.TAGS = [
   { id: 'race', group: 'feature', kana: 'れーすの くるま', color: '#1d3557' },
   { id: 'offroad', group: 'feature', kana: 'でこぼこみちに つよい', color: '#1d3557' },
   { id: 'electric', group: 'feature', kana: 'でんきで はしる', color: '#1d3557' },
+  { id: 'work', group: 'feature', kana: 'はたらく くるま', color: '#1d3557' },
 ];
 
 // 色の一覧をつくる。最初に もとの色、そのあとに ほかの色を並べる
@@ -350,6 +352,47 @@ window.CARS = [
     poster: 'posters/cybertruck.webp',
     credit: lexyc('Tesla Cybertruck', 'tesla-cybertruck-f12e67159f75486bb21213e573520612', false),
   },
+  {
+    id: 'crown',
+    kana: 'くらうん',
+    say: 'むかしから ある おおきな せだん。たくしーや ぱとかー にも つかわれるよ。',
+    tags: ['toyota', 'japan'],
+    name: 'クラウン（170系・11代目）',
+    maker: 'トヨタ',
+    years: '1999年〜2003年',
+    model: 'models/crown.glb',
+    poster: 'posters/crown.webp',
+    paint: { material: 'material_5', also: ['beige_lower', 'body-color1'], colors: colors('しろ', '#f2f2f2') },
+    credit: {
+      title: 'Toyota+crown+s170+final',
+      author: 'MEMO.YT',
+      license: 'CC BY 4.0',
+      licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
+      source: 'Sketchfab',
+      sourceUrl: 'https://sketchfab.com/3d-models/toyotacrowns170final-9d65b466f9764f45ad6be24c4a7f7aee',
+      changes: 'ファイルを軽くするため圧縮し、車のまわりにあった余分な線を取り除きました',
+    },
+  },
+  {
+    id: 'patrol',
+    kana: 'ぱとかー',
+    say: 'じけんや じこの ときに かけつける けいさつの くるま。あかい らんぷが めじるし。',
+    tags: ['toyota', 'japan', 'work'],
+    name: 'パトロールカー（クラウン 170系がもと）',
+    maker: 'トヨタ',
+    years: '1999年〜2003年のクラウンがもと',
+    model: 'models/patrol.glb',
+    poster: 'posters/patrol.webp',
+    credit: {
+      title: 'Toyota+crown+s170+final',
+      author: 'MEMO.YT',
+      license: 'CC BY 4.0',
+      licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
+      source: 'Sketchfab',
+      sourceUrl: 'https://sketchfab.com/3d-models/toyotacrowns170final-9d65b466f9764f45ad6be24c4a7f7aee',
+      changes: 'もとは ふつうのクラウンです。パトカーの白黒の塗り分け、屋根の赤いランプ、ドアの文字を、この図鑑で加えました。屋根の荷物用の棒は外しました',
+    },
+  },
 ];
 
 // クイズの はずれの選択肢に まぜる名前（図鑑の車が少ないうちに使います）
@@ -493,6 +536,11 @@ const REAL_COLORS = {
     ['ぽーらー ほわいと', 'ポーラーホワイト', '#f4f4f2'],
     ['いりじうむ しるばー', 'イリジウムシルバー', '#a7abae'],
     ['まぐねたいと ぶらっく', 'マグネタイトブラック', '#2a2c30'],
+  ],
+  crown: [
+    ['ほわいと ぱーる', 'ホワイトパールクリスタルシャイン（ツートン）', '#f2f2f2'],
+    ['ぶらっく', 'ブラック', '#0c0c0c'],
+    ['しるばー', 'シルバーメタリック', '#a9adb0'],
   ],
 };
 for (const car of window.CARS) {
