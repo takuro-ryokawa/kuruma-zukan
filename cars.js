@@ -196,7 +196,7 @@ window.CARS = [
   },
   {
     id: 'rx7',
-    kana: 'あーるえっくす せぶん',
+    kana: 'あーるえっくす せぶん（えふでぃー）',
     say: 'ろーたりーえんじん という めずらしい えんじんで はしるよ。',
     tags: ['mazda', 'japan', 'popup'],
     name: 'RX-7（FD3S型）',

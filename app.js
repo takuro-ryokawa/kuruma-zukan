@@ -230,7 +230,7 @@
       b.textContent = t.kana;
       b.style.background = t.color;
       // タグを押すと、そのタグの車だけの一覧にもどる
-      b.addEventListener('click', () => { selected.clear(); selected.add(id); filterOpen = false; lastListScroll = 0; renderTags(); renderCards(); location.hash = '#/'; });
+      b.addEventListener('click', () => { selected.clear(); selected.add(id); filterOpen = false; lastListScroll = 0; renderTags(); renderCards(); location.hash = '#/list'; });
       chips.appendChild(b);
     }
     $('car-kana').textContent = car.kana;
@@ -262,6 +262,14 @@
     mv.setAttribute('camera-orbit', car.orbit || '35deg 75deg auto');
     stage.style.background = k.color + '18';
     stage.appendChild(mv);
+    // 3Dを 画面いっぱいに する ボタン
+    const full = document.createElement('button');
+    full.type = 'button';
+    full.className = 'full-btn';
+    full.id = 'full-btn';
+    full.addEventListener('click', () => setFull(!stage.classList.contains('full')));
+    stage.appendChild(full);
+    setFull(false);
     renderColors(car, mv);
 
     stopSound();
@@ -523,7 +531,7 @@
     }
   }
 
-  // ---------- となりの車へ（ボタンと、よこに すべらせる うごき） ----------
+  // ---------- となりの車へ（まえ・つぎ の ボタン） ----------
   // いま しぼりこんでいる車の中で、まえ・つぎ に うつる
   function carOrder() {
     const q = norm(query);
@@ -549,69 +557,85 @@
   $('car-prev').addEventListener('click', () => stepCar(-1));
   $('car-next').addEventListener('click', () => stepCar(1));
 
-  // 3Dの車の上では まわす うごきに使うので、そこでは うつらない
-  let swipe = null;
-  const carView = $('car-view');
-  carView.addEventListener('touchstart', (e) => {
-    swipe = null;
-    if (e.touches.length !== 1 || e.target.closest('#stage, input, .viewer')) return;
-    swipe = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  }, { passive: true });
-  carView.addEventListener('touchend', (e) => {
-    if (!swipe) return;
-    const t = e.changedTouches[0];
-    const dx = t.clientX - swipe.x;
-    const dy = t.clientY - swipe.y;
-    swipe = null;
-    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 2) stepCar(dx < 0 ? 1 : -1);
-  }, { passive: true });
-  carView.addEventListener('touchcancel', () => { swipe = null; }, { passive: true });
+  // ---------- 3Dを 画面いっぱいに ----------
+  function setFull(on) {
+    const stage = $('stage');
+    const mv = stage.querySelector('model-viewer');
+    const btn = $('full-btn');
+    stage.classList.toggle('full', on);
+    document.body.classList.toggle('no-scroll', on);
+    // いっぱいのときは、たてに うごかしても 車が まわるようにする
+    if (mv) mv.setAttribute('touch-action', on ? 'none' : 'pan-y');
+    if (btn) {
+      btn.textContent = on ? '✕ とじる' : '⤢ おおきく';
+      btn.setAttribute('aria-label', on ? 'もとの おおきさに もどす' : '3Dを がめん いっぱいに する');
+    }
+  }
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setFull(false); });
+
+  // ---------- トップ ----------
+  // きょうの くるま は、アプリを ひらくたびに 1台 えらぶ
+  const todayCar = CARS[Math.floor(Math.random() * CARS.length)];
+  function showHome() {
+    $('today').href = '#/car/' + todayCar.id;
+    $('today-name').textContent = todayCar.kana;
+    const box = $('today-stage');
+    box.style.background = makerOf(todayCar).color + '18';
+    if (box.firstChild) return;
+    const mv = document.createElement('model-viewer');
+    mv.setAttribute('src', todayCar.model);
+    mv.setAttribute('poster', todayCar.poster);
+    mv.setAttribute('alt', todayCar.kana);
+    mv.setAttribute('auto-rotate', '');
+    mv.setAttribute('auto-rotate-delay', '0');
+    mv.setAttribute('rotation-per-second', '24deg');
+    mv.setAttribute('interaction-prompt', 'none');
+    mv.setAttribute('shadow-intensity', '1');
+    mv.setAttribute('camera-orbit', todayCar.orbit || '35deg 75deg auto');
+    box.appendChild(mv);
+  }
 
   // ---------- 画面の切りかえ ----------
   let lastListScroll = 0;
   function route() {
     const h = location.hash;
     const m = h.match(/^#\/car\/([\w-]+)/);
-    const listV = $('list-view');
-    const wasList = !listV.hidden;
-    if (wasList) lastListScroll = window.scrollY;
+    const views = ['home-view', 'list-view', 'car-view', 'quiz-view', 'about-view'];
+    const show = (id) => views.forEach((v) => { $(v).hidden = v !== id; });
+    if (!$('list-view').hidden) lastListScroll = window.scrollY;
     closeViewer();
+    setFull(false);
 
-    if (m) {
-      const car = CARS.find((c) => c.id === m[1]);
-      if (car) {
-        listV.hidden = true;
-        $('about-view').hidden = true;
-        $('quiz-view').hidden = true;
-        $('car-view').hidden = false;
-        showCar(car);
-        window.scrollTo(0, 0);
-        return;
-      }
+    const car = m && CARS.find((c) => c.id === m[1]);
+    if (car) {
+      $('today-stage').innerHTML = '';
+      show('car-view');
+      showCar(car);
+      window.scrollTo(0, 0);
+      return;
     }
     stopSound();
     current = null;
     $('stage').innerHTML = '';
-    $('car-view').hidden = true;
-    $('quiz-view').hidden = true;
+    if (h === '#/list') {
+      $('today-stage').innerHTML = '';
+      show('list-view');
+      window.scrollTo(0, lastListScroll);
+      return;
+    }
     if (h === '#/quiz') {
-      listV.hidden = true;
-      $('about-view').hidden = true;
-      $('quiz-view').hidden = false;
+      $('today-stage').innerHTML = '';
+      show('quiz-view');
       startQuiz();
-      window.scrollTo(0, 0);
-      return;
-    }
-    if (h === '#/about') {
-      listV.hidden = true;
-      $('about-view').hidden = false;
+    } else if (h === '#/about') {
+      $('today-stage').innerHTML = '';
+      show('about-view');
       renderAbout();
-      window.scrollTo(0, 0);
-      return;
+    } else {
+      show('home-view');
+      showHome();
     }
-    $('about-view').hidden = true;
-    listV.hidden = false;
-    window.scrollTo(0, lastListScroll);
+    window.scrollTo(0, 0);
   }
 
   renderTags();

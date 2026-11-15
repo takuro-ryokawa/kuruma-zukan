@@ -21,9 +21,24 @@
 </head>
 <body>
 
+<!-- トップ -->
+<section id="home-view" hidden>
+  <h1 class="home-title">くるま ずかん</h1>
+  <a class="today" id="today" href="#/list">
+    <div class="today-label">きょうの くるま</div>
+    <div class="today-stage" id="today-stage"></div>
+    <div class="today-name" id="today-name"></div>
+  </a>
+  <div class="home-buttons">
+    <a class="home-btn" href="#/list">ずかんを みる</a>
+    <a class="home-btn quiz" href="#/quiz">くいずで あそぶ</a>
+  </div>
+</section>
+
 <!-- 一覧 -->
-<section id="list-view">
+<section id="list-view" hidden>
   <header class="top">
+    <a class="home-link" href="#/" aria-label="とっぷへ もどる">←</a>
     <h1>くるま ずかん</h1>
     <a class="quiz-link" href="#/quiz">くいず</a>
   </header>
@@ -41,7 +56,7 @@
 <!-- 1台のページ -->
 <section id="car-view" hidden>
   <header class="bar">
-    <a class="back" href="#/">← もどる</a>
+    <a class="back" href="#/list">← もどる</a>
     <div class="car-nav">
       <button type="button" id="car-prev" aria-label="まえの くるま">‹</button>
       <span id="car-pos"></span>
@@ -107,7 +122,7 @@
 <!-- このアプリについて -->
 <section id="about-view" hidden>
   <header class="bar">
-    <a class="back" href="#/">← もどる</a>
+    <a class="back" href="#/list">← もどる</a>
   </header>
   <div class="about">
     <h2>このアプリについて</h2>

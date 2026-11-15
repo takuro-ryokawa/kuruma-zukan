@@ -464,3 +464,90 @@ button, label { font: inherit; }
 @media (prefers-reduced-motion: reduce) {
   #car-view.slide-next > :not(.bar), #car-view.slide-prev > :not(.bar) { animation: none; }
 }
+
+/* トップ */
+#home-view { padding: 28px 16px 40px; text-align: center; }
+.home-title { margin: 0 0 18px; font-size: 44px; font-weight: 900; letter-spacing: .04em; }
+.today {
+  display: block;
+  text-decoration: none;
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: 0 3px 0 var(--line);
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+.today:active { transform: scale(.98); }
+.today-label { padding: 12px 0 8px; font-size: 20px; font-weight: 900; color: var(--accent); }
+.today-stage model-viewer {
+  display: block;
+  width: 100%;
+  height: min(38vh, 340px);
+  pointer-events: none;
+  --poster-color: transparent;
+}
+.today-name { padding: 10px 12px 14px; font-size: 30px; font-weight: 900; line-height: 1.3; }
+.home-buttons { display: grid; gap: 12px; margin-top: 20px; }
+.home-btn {
+  display: block;
+  text-decoration: none;
+  background: var(--navy);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 18px;
+  font-size: 26px;
+  font-weight: 900;
+}
+.home-btn.quiz { background: var(--accent); }
+.home-btn:active { transform: scale(.98); }
+.home-link {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 3px solid var(--ink);
+  background: #fff;
+  text-decoration: none;
+  font-size: 22px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.top h1 { flex: 1; }
+
+/* 3Dを 画面いっぱいに */
+.stage { position: relative; }
+.full-btn {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 2;
+  border: 3px solid var(--ink);
+  background: #fff;
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.stage.full {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  margin: 0;
+  border-radius: 0;
+  background: var(--bg) !important;
+}
+.stage.full model-viewer { height: 100%; }
+.stage.full .full-btn {
+  top: calc(env(safe-area-inset-top) + 12px);
+  right: calc(env(safe-area-inset-right) + 12px);
+  bottom: auto;
+  font-size: 20px;
+  padding: 8px 18px;
+}
+body.no-scroll { overflow: hidden; }
+#list-view .top h1 { font-size: 28px; white-space: nowrap; }
