@@ -96,7 +96,8 @@ window.CARS = [
     years: '1983年〜1987年',
     model: 'models/ae86.glb',
     poster: 'posters/ae86.webp',
-    paint: { material: 'Material.001', colors: colors('しろ', '#ffffff') },
+    // decal は、ドアの文字の部品の名前。色ごとに 出す・消す を切りかえる
+    paint: { material: 'Material.001', decal: 'tofu_shop.002', decalMark: 'とうふ', colors: colors('しろ', '#ffffff') },
     credit: lexyc('Toyota Corolla AE86 Trueno', 'toyota-corolla-ae86-trueno-fe02fba6302e450ea8424591493341ea', false),
   },
   {
@@ -275,6 +276,8 @@ const REAL_COLORS = {
     ['くいっく しるばー', 'クイックシルバー', '#7d8185'],
   ],
   ae86: [
+    // 4つめの true は、ドアの「藤原とうふ店」の文字を出す しるし
+    ['まんがの はちろく', '漫画『頭文字D』の姿（ホワイト／ブラック ツートン）', '#ffffff', true],
     ['しろ と くろ', 'ホワイト／ブラック ツートン', '#ffffff'],
     ['あか と くろ', 'レッド／ブラック ツートン', '#c8102e'],
     ['ぎん と くろ', 'シルバー／ブラック ツートン', '#a8acaf'],
@@ -366,6 +369,6 @@ for (const car of window.CARS) {
   const list = REAL_COLORS[car.id];
   if (list) {
     car.paint.real = true;
-    car.paint.colors = list.map(([kana, name, css]) => ({ kana, name, css }));
+    car.paint.colors = list.map(([kana, name, css, decal]) => ({ kana, name, css, decal: !!decal }));
   }
 }

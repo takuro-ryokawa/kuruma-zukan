@@ -289,13 +289,31 @@
     showName();
     const apply = () => {
       if (!mv.model) return;
+      const col = car.paint.colors[chosen];
       const mat = mv.model.materials.find((m) => m.name === car.paint.material);
-      if (mat) mat.pbrMetallicRoughness.setBaseColorFactor(car.paint.colors[chosen].css);
+      if (mat) mat.pbrMetallicRoughness.setBaseColorFactor(col.css);
+      // ドアの文字など、色によって出したり消したりする部品
+      if (car.paint.decal) {
+        const d = mv.model.materials.find((m) => m.name === car.paint.decal);
+        if (d) {
+          if (decalMode === null) decalMode = d.getAlphaMode();
+          if (col.decal) {
+            d.setAlphaMode(decalMode);
+            d.pbrMetallicRoughness.setBaseColorFactor([1, 1, 1, 1]);
+          } else {
+            d.setAlphaMode('MASK');
+            d.setAlphaCutoff(0.5);
+            d.pbrMetallicRoughness.setBaseColorFactor([1, 1, 1, 0]);
+          }
+        }
+      }
     };
+    let decalMode = null;
     car.paint.colors.forEach((col, i) => {
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'swatch';
+      if (col.decal && car.paint.decalMark) b.textContent = car.paint.decalMark;
       b.style.background = col.css;
       b.setAttribute('aria-label', col.kana);
       b.setAttribute('aria-pressed', String(i === 0));
