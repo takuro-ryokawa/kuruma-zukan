@@ -270,6 +270,7 @@
     sb.setAttribute('aria-pressed', 'false');
 
     renderPhotos();
+    showCarPos();
   }
 
   // ---------- 色の切りかえ ----------
@@ -521,6 +522,50 @@
       }
     }
   }
+
+  // ---------- となりの車へ（ボタンと、よこに すべらせる うごき） ----------
+  // いま しぼりこんでいる車の中で、まえ・つぎ に うつる
+  function carOrder() {
+    const q = norm(query);
+    const list = CARS.filter((c) => tagMatch(c) && matches(c, q));
+    return current && list.includes(current) ? list : CARS;
+  }
+  function stepCar(delta) {
+    if (!current) return;
+    const list = carOrder();
+    if (list.length < 2) return;
+    const next = list[(list.indexOf(current) + delta + list.length) % list.length];
+    const view = $('car-view');
+    view.classList.remove('slide-next', 'slide-prev');
+    void view.offsetWidth;
+    view.classList.add(delta > 0 ? 'slide-next' : 'slide-prev');
+    location.replace('#/car/' + next.id);
+  }
+  function showCarPos() {
+    const list = carOrder();
+    $('car-pos').textContent = `${list.indexOf(current) + 1} / ${list.length}`;
+    $('car-prev').disabled = $('car-next').disabled = list.length < 2;
+  }
+  $('car-prev').addEventListener('click', () => stepCar(-1));
+  $('car-next').addEventListener('click', () => stepCar(1));
+
+  // 3Dの車の上では まわす うごきに使うので、そこでは うつらない
+  let swipe = null;
+  const carView = $('car-view');
+  carView.addEventListener('touchstart', (e) => {
+    swipe = null;
+    if (e.touches.length !== 1 || e.target.closest('#stage, input, .viewer')) return;
+    swipe = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }, { passive: true });
+  carView.addEventListener('touchend', (e) => {
+    if (!swipe) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - swipe.x;
+    const dy = t.clientY - swipe.y;
+    swipe = null;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 2) stepCar(dx < 0 ? 1 : -1);
+  }, { passive: true });
+  carView.addEventListener('touchcancel', () => { swipe = null; }, { passive: true });
 
   // ---------- 画面の切りかえ ----------
   let lastListScroll = 0;
