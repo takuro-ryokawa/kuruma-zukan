@@ -292,6 +292,10 @@
       const col = car.paint.colors[chosen];
       const mat = mv.model.materials.find((m) => m.name === car.paint.material);
       if (mat) mat.pbrMetallicRoughness.setBaseColorFactor(col.css);
+      if (car.paint.hood) {
+        const h = mv.model.materials.find((m) => m.name === car.paint.hood);
+        if (h) h.pbrMetallicRoughness.setBaseColorFactor(col.decal ? '#070707' : col.css);
+      }
       // ドアの文字など、色によって出したり消したりする部品
       if (car.paint.decal) {
         const d = mv.model.materials.find((m) => m.name === car.paint.decal);

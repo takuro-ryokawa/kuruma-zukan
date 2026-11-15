@@ -97,8 +97,12 @@ window.CARS = [
     model: 'models/ae86.glb',
     poster: 'posters/ae86.webp',
     // decal は、ドアの文字の部品の名前。色ごとに 出す・消す を切りかえる
-    paint: { material: 'Material.001', decal: 'tofu_shop.002', decalMark: 'とうふ', colors: colors('しろ', '#ffffff') },
-    credit: lexyc('Toyota Corolla AE86 Trueno', 'toyota-corolla-ae86-trueno-fe02fba6302e450ea8424591493341ea', false),
+    // hood は、ボンネットの部品の名前。文字を出す色では黒、ほかは車体と同じ色にする
+    paint: { material: 'Material.001', decal: 'tofu_shop.002', decalMark: 'とうふ', hood: 'AE86_HOOD', colors: colors('しろ', '#ffffff') },
+    credit: {
+      ...lexyc('Toyota Corolla AE86 Trueno', 'toyota-corolla-ae86-trueno-fe02fba6302e450ea8424591493341ea', false),
+      changes: 'ファイルを軽くするため圧縮し、ボンネットを別の部品に分けて色を変えられるようにしました',
+    },
   },
   {
     id: 'civic',
